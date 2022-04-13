@@ -65,48 +65,49 @@ def extract_text(boxes):
 
 # base function
 def ocr(filename, show_boxes):
-    # FILEOPENOPTIONS = dict(defaultextension='.pdf', initialdir='/', filetypes=[('pdf file', '*.pdf')], title='Select File')
-    # filename = filedialog.askopenfilename(**FILEOPENOPTIONS)
-    # print(filename)
-
     if filename:
         img_list = pdf_to_img(filename)
         # print(img_list)
         boxes = bounding_boxes(img_list, show_boxes)
         if not show_boxes:
             text = extract_text(boxes)
-            save_here = filedialog.askdirectory(initialdir='/', title='Select Directory')
-            if save_here:
-                with open(os.path.join(save_here, 'extracted_text.txt'), 'w') as file:
-                    file.write(text)
-                messagebox.showinfo(title='Success', message='Text stored successfully!')
-            else:
-                messagebox.showwarning(title='Required', message='Please select a save location.')
+            # text = 'hii'
+            return text
     else:
-        messagebox.showwarning(title='Required', message='Please select a PDF file!')
-
+        st.warning('Please select a PDF file!')
 
 # main code
 st.title('Text Extraction using OCR')
 uploaded_file = st.file_uploader(label='Upload PDF', type='pdf')
 
+if 'text' not in st.session_state:
+    st.session_state.text = ''
+
+if 'flag' not in st.session_state:
+    st.session_state.flag = False
+
 if uploaded_file:
     filename = uploaded_file.name
     row0col1, row0col2 = st.columns([1, 1])
     with row0col1:
-        st.button(label='Run OCR', on_click=ocr(filename, 0))
+        if st.button(label='Run OCR'):
+            st.session_state.text = ocr(filename, 0)
+            st.session_state.flag = True
+        
+        if st.session_state.flag:
+            root = Tk()
+            root.withdraw()
+
+            # Make folder picker dialog appear on top of other windows
+            root.wm_attributes('-topmost', 1)
+            
+            if st.button('Save File'):
+                dirname = st.text_input('Selected folder:', filedialog.askdirectory(master=root))
+                with open(os.path.join(dirname, 'extracted_text.txt'), 'w') as file:
+                        file.write(st.session_state.text)
+                st.success('File saved successfully!')
+                
     with row0col2:
-        st.button(label='Bounding Box', on_click=ocr(filename, 1))
+        if st.button(label='Bounding Box'):
+            ocr(filename, 1)
 
-
-main = Tk()
-main.title('OCR')
-main.geometry('250x200')
-
-ocr_btn = Button(main, text='Run OCR', command=lambda: ocr(0))
-ocr_btn.place(relwidth=0.4, relheight=0.17, x=75, y=40)
-box_btn = Button(main, text='Bounding Box', command=lambda: ocr(1))
-box_btn.place(relwidth=0.4, relheight=0.17, x=75, y=110)
-
-main.resizable(False, False)
-main.mainloop()
