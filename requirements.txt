@@ -1,5 +1,4 @@
 pytesseract
 pdf2image
 streamlit
-tkinter
 opencv-python
