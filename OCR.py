@@ -1,6 +1,6 @@
 import pytesseract
 from pdf2image import convert_from_path
-from cv2 import cv2
+import cv2
 import os
 import streamlit as st
 from tkinter import *
