@@ -1,1 +1,2 @@
 tesseract-ocr
+libgl1
